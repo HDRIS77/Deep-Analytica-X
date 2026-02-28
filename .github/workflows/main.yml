@@ -1,0 +1,19 @@
+name: Run Intelligence Research
+on:
+  workflow_dispatch: # هذا يسمح لك بتشغيل البحث يدوياً بضغطة زر
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run Research Engine
+        env:
+          MY_SECRET_API_KEY: ${{ secrets.MY_SECRET_API_KEY }}
+        run: python research_engine.py
