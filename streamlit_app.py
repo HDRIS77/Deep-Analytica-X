@@ -2,129 +2,150 @@ import streamlit as st
 import requests
 import io
 import datetime
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
+import time
+import random
 
-# --- إعدادات الصفحة الفنية ---
-st.set_page_config(page_title="Intel-Core-X | Devil's Advocate", layout="wide", initial_sidebar_state="expanded")
+# --- إعدادات الهوية البصرية والسمات (NEXUS DARK THEME) ---
+st.set_page_config(page_title="NEXUS | Global Intelligence", layout="wide")
 
-# --- إدارة المفتاح السري ---
-# ملاحظة: سيحاول الكود جلب المفتاح من Secrets أولاً، وإذا لم يجده سيستخدم المفتاح الذي زودتني به.
-GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "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")
-
-# --- دالة التنبيه الأمني الوامض (CSS) ---
-def trigger_security_alert():
-    st.markdown("""
-        <style>
-        @keyframes blinker { 50% { opacity: 0; } }
-        .security-banner {
-            background-color: #660000; border: 4px solid #ff0000;
-            padding: 20px; color: #ffffff; font-weight: bold;
-            text-align: center; border-radius: 12px;
-            animation: blinker 0.7s linear infinite;
-            box-shadow: 0px 0px 20px #ff0000; margin-bottom: 25px;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        </style>
-        <div class="security-banner">
-            ⚠️ بروتوكول "محامي الشيطان" نشط: يتم الآن اختراق التعتيم الإعلامي وتحليل الفجوات الاستخباراتية ⚠️
-        </div>
-    """, unsafe_allow_html=True)
-
-# --- محرك التحليل (Groq API) ---
-def fetch_devil_analysis(target):
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
+# CSS لتخصيص الواجهة بالكامل (اللون الداكن + النيون + الأنيميشن)
+st.markdown("""
+    <style>
+    /* جعل الخلفية سوداء عميقة */
+    .stApp {
+        background-color: #050505;
+        color: #e0e0e0;
     }
     
-    # البرومبت المطور للتحليل الزمني ونسب الاحتمالات
-    system_prompt = """أنت "كبير المحللين في وكالة استخبارات" تعمل بصفة محامي الشيطان. 
-    وظيفتك تفكيك الأحداث الجارية (مثل ملفات إيران، الحروب، والاغتيالات) بدقة عسكرية. 
-    لا تجامل، لا تملق، اذكر الحقائق القاسية والمخططات المسكوت عنها."""
+    /* لوجو NEXUS نيون أزرق مشع */
+    .neon-logo {
+        color: #fff;
+        text-align: center;
+        font-size: 70px;
+        font-weight: bold;
+        text-shadow: 0 0 10px #fff, 0 0 20px #0073ff, 0 0 30px #0073ff, 0 0 40px #0073ff;
+        font-family: 'Orbitron', sans-serif;
+        margin-top: 10px;
+    }
     
-    user_prompt = f"""
-    قم بتشريح ملف {target} بناءً على القواعد التالية:
-    1. **رصد الأحداث العاجلة**: اربط التحليل بآخر الأخبار (مثل الاغتيالات، التحركات العسكرية، أو الانهيارات الاقتصادية).
-    2. **الجدول الزمني للعمليات**: حدد تواريخ مفصلية لما حدث وما سيحدث بناءً على المعطيات.
-    3. **تحليل المخطط (The Deep Scheme)**: ما هو المخطط الذي يخدمه هذا الحدث؟ (تغيير ديموغرافي، سيطرة طاقة، إلخ).
-    4. **تقدير الموقف (قريب المدى - 3 أشهر)**: توقع الرد أو الخطوة القادمة بدقة مع نسبة احتمالية (%).
-    5. **تقدير الموقف (بعيد المدى - 5 سنوات)**: شكل المنطقة أو الدولة المستقبلي مع نسبة احتمالية (%).
-    6. **مؤشر خطر الصراع**: أعطِ تقييماً من 100% لمدى خطورة الموقف حالياً.
-    """
+    /* الساعة الحية ونظام المزامنة */
+    .live-clock {
+        color: #00d4ff;
+        text-align: center;
+        font-size: 18px;
+        font-family: 'Share Tech Mono', monospace;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }
+    
+    /* الخريطة الحرارية الاستخباراتية */
+    .heat-map-container {
+        border: 1px solid #0073ff;
+        background: url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg');
+        background-size: cover;
+        height: 300px;
+        position: relative;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        opacity: 0.4;
+    }
+    
+    .pulse-dot {
+        width: 15px; height: 15px; background: red;
+        border-radius: 50%; position: absolute;
+        box-shadow: 0 0 15px red;
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+    
+    /* البانر الأمني الوامض */
+    .security-alert {
+        background-color: #0a0a0a; border: 2px solid #00d4ff;
+        padding: 15px; color: #00d4ff; text-align: center;
+        border-radius: 5px; animation: blinker 2s linear infinite;
+        font-family: 'Courier New', monospace; margin: 20px 0;
+    }
+    @keyframes blinker { 50% { opacity: 0.3; } }
+    </style>
+    
+    <div class="neon-logo">NEXUS</div>
+""", unsafe_allow_html=True)
 
+# عرض الساعة والوقت المحدث
+now = datetime.datetime.now()
+st.markdown(f'<div class="live-clock">STATUS: ACTIVE | SYSTEM_TIME: {now.strftime("%H:%M:%S")} | DATA_SYNC: REAL-TIME</div>', unsafe_allow_html=True)
+
+# --- محاكي الخريطة الحرارية (تفاعلية حسب البحث) ---
+def display_heat_map():
+    # أماكن عشوائية للنقاط الحمراء تعطي إيحاءً بالتوتر العالمي
+    dots = ""
+    for _ in range(5):
+        top = random.randint(20, 80)
+        left = random.randint(10, 90)
+        dots += f'<div class="pulse-dot" style="top: {top}%; left: {left}%;"></div>'
+    
+    st.markdown(f'<div class="heat-map-container">{dots}</div>', unsafe_allow_html=True)
+
+# --- إدارة الاتصال بـ Groq API ---
+API_KEY = st.secrets.get("GROQ_API_KEY", "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")
+
+def nexus_intelligence_engine(target):
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+    
+    # البرومبت "محامي الشيطان" مع تاريخ اليوم الفعلي
+    system_instruction = f"""
+    أنت نظام NEXUS العسكري. تاريخ اليوم هو {now.strftime("%Y-%m-%d")}. 
+    مهمتك تشريح ملف {target} بلهجة محامي الشيطان. 
+    يجب أن يتضمن التقرير: 
+    1. رصد ميداني (الأحداث في آخر 24 ساعة). 
+    2. تحليل المخططات السفلية (أنفاق، صفقات سلاح، تحركات سرية).
+    3. توقعات (المدى القريب: 72 ساعة) و (المدى البعيد: سنوات). 
+    في نهاية الرد، اكتب حصراً: "FINAL_RISK_LEVEL: X%" (استبدل X بالنسبة).
+    """
+    
     data = {
         "model": "llama-3.3-70b-versatile",
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        "temperature": 0.5 # درجة منخفضة لضمان الدقة التحليلية وعدم التخريف
+        "messages": [{"role": "system", "content": system_instruction},
+                     {"role": "user", "content": f"أعطني التقرير المسرب عن {target}"}],
+        "temperature": 0.2
     }
     
     try:
         response = requests.post(url, headers=headers, json=data)
         return response.json()['choices'][0]['message']['content']
-    except Exception as e:
-        return f"فشل في الاتصال بالعقل الاصطناعي: {str(e)}"
+    except:
+        return "CRITICAL ERROR: CONNECTION REFUSED BY INTEL-CORE."
 
-# --- دالة صناعة التقرير PDF السري ---
-def generate_pdf_report(target, text):
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-    c.setStrokeColorRGB(0.5, 0, 0)
-    c.rect(15, 15, width-30, height-30, stroke=1)
-    c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(width/2, height-50, f"CLASSIFIED REPORT: {target.upper()}")
-    c.setFont("Helvetica", 10)
-    c.drawString(50, height-70, f"DATE: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    
-    to = c.beginText(50, height-100)
-    for line in text.split('\n'):
-        to.textLine(line[:95])
-    c.drawText(to)
-    c.showPage()
-    c.save()
-    buffer.seek(0)
-    return buffer
+# --- واجهة العمليات الاستخباراتية ---
+display_heat_map()
 
-# --- واجهة المستخدم (Streamlit UI) ---
-st.title("🔦 المنصة الاستخباراتية: Intel-Core-X")
-st.markdown("---")
+target_query = st.text_input("📡 أدخل إحداثيات الهدف (اسم الدولة أو الحدث):", placeholder="مثلاً: الانقلاب العسكري المحتمل في X...")
 
-with st.sidebar:
-    st.header("⚙️ إعدادات المحلل")
-    st.info("المنصة مفعلة الآن بنمط 'محامي الشيطان' للبحث عن الحقائق غير المعلنة.")
-    risk_threshold = st.slider("مستوى الحذر الاستراتيجي", 0, 100, 85)
-
-# المدخلات
-target_subject = st.text_input("أدخل الدولة، المحافظة، أو القضية العاجلة:", placeholder="مثلاً: الصراع الإيراني الإسرائيلي حالياً")
-
-if st.button("تفعيل التشريح الاستخباراتي"):
-    if target_subject:
-        # 1. إظهار التنبيه الوامض
-        trigger_security_alert()
+if st.button("تفعيل التشريح العميق"):
+    if target_query:
+        st.markdown('<div class="security-alert">⚠️ جارٍ اختراق البروتوكولات الإعلامية.. سحب البيانات الحية جارٍ.. ⚠️</div>', unsafe_allow_html=True)
         
-        # 2. جلب التحليل
-        with st.spinner("جاري معالجة البيانات وتحليل المسارات الزمنية..."):
-            raw_analysis = fetch_devil_analysis(target_subject)
+        with st.spinner("PROCESSING..."):
+            report = nexus_intelligence_engine(target_query)
             
-            # 3. عرض النتائج
-            st.markdown("### 📊 التقرير الاستراتيجي المستخرج:")
-            st.markdown(raw_analysis)
+            # استخراج مؤشر الخطر تلقائياً
+            risk_score = 70
+            if "FINAL_RISK_LEVEL:" in report:
+                try: risk_score = int(report.split("FINAL_RISK_LEVEL:")[1].split("%")[0].strip())
+                except: pass
             
-            # 4. مؤشر الخطر (قيمة افتراضية مستخرجة من النص لو أمكن، أو عرض ثابت)
-            st.sidebar.warning(f"مؤشر خطر الصراع الحالي: {risk_threshold}%")
+            # تحديث الشريط الجانبي
+            st.sidebar.markdown(f"<h1 style='color:#ff0000; text-align:center;'>{risk_score}%</h1>", unsafe_allow_html=True)
+            st.sidebar.markdown("<p style='text-align:center;'>THREAT PROBABILITY</p>", unsafe_allow_html=True)
+            st.sidebar.progress(risk_score)
             
-            # 5. زر تحميل الـ PDF
-            report_pdf = generate_pdf_report(target_subject, raw_analysis)
-            st.download_button(
-                label="📥 تحميل الوثيقة المسربة (PDF)",
-                data=report_pdf,
-                file_name=f"INTEL_REPORT_{target_subject}.pdf",
-                mime="application/pdf"
-            )
+            # عرض التقرير
+            st.markdown("### 📄 الوثيقة الاستخباراتية المستخرجة:")
+            st.code(report, language='markdown') # وضع التقرير داخل صندوق كود ليعطي إيحاء تقني
+            
+            st.caption(f"توقيت الاستخراج: {datetime.datetime.now().strftime('%H:%M:%S')} | المصدر: NEXUS CORE")
     else:
-        st.error("⚠️ يرجى إدخال هدف للتحليل.")
+        st.error("أدخل هدفاً أولاً.")
