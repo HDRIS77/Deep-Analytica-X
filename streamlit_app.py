@@ -9,21 +9,26 @@ from reportlab.lib.units import inch
 # إعدادات الصفحة
 st.set_page_config(page_title="Intel-Core-X: Devil's Advocate", layout="wide")
 
-# استدعاء الـ API Key من إعدادات Streamlit
-API_KEY = st.secrets["MY_SECRET_API_KEY"]
+# استدعاء المفتاح السري (يجب وضعه في Streamlit Secrets)
+if "MY_SECRET_API_KEY" in st.secrets:
+    API_KEY = st.secrets["MY_SECRET_API_KEY"]
+else:
+    st.error("خطأ أمني: مفتاح الـ API غير موجود في إعدادات Streamlit Secrets.")
+    st.stop()
 
-# دالة التنبيهات الأمنية الوامضة
-def security_alert():
+# دالة التنبيهات الأمنية الوامضة (CSS Animation)
+def security_alert_ui():
     st.markdown("""
         <style>
-        @keyframes blinker { 50% { opacity: 0; } }
-        .security-alert {
-            background-color: #ff4b4b; padding: 20px; color: white;
-            font-weight: bold; text-align: center; border-radius: 10px;
-            animation: blinker 1s linear infinite; margin-bottom: 20px;
+        @keyframes blink { 50% { opacity: 0; } }
+        .blink-bg {
+            background-color: #ff0000; padding: 15px; color: white;
+            font-weight: bold; text-align: center; border-radius: 5px;
+            animation: blink 0.8s linear infinite; margin: 10px 0;
+            border: 2px solid black;
         }
         </style>
-        <div class="security-alert">⚠️ تحذير أمني: تم اكتشاف فجوة استخباراتية خطيرة - جاري تشريح البيانات المسكوت عنها ⚠️</div>
+        <div class="blink-bg">⚠️ فحص استخباري جارٍ: يتم الآن تشريح الفجوات الأمنية والسياسية ⚠️</div>
     """, unsafe_allow_html=True)
 
 def get_ai_analysis(prompt):
@@ -33,17 +38,14 @@ def get_ai_analysis(prompt):
     response = requests.post(url, headers=headers, json=data)
     return response.json()['candidates'][0]['content']['parts'][0]['text']
 
-# دالة توليد PDF سري للغاية
-def create_top_secret_pdf(target, content):
+# دالة إنشاء PDF سري للغاية
+def create_pdf(target, content):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-    c.setStrokeColorRGB(0.7, 0, 0)
-    c.rect(0.2*inch, 0.2*inch, width-0.4*inch, height-0.4*inch, stroke=1)
-    c.setFont("Helvetica-Bold", 14)
-    c.drawString(0.5*inch, height-0.5*inch, "INTEL-CORE-X SYSTEM / TOP SECRET")
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(1*inch, 10.5*inch, f"TOP SECRET REPORT: {target}")
     c.setFont("Helvetica", 10)
-    text_obj = c.beginText(0.6*inch, height-1.5*inch)
+    text_obj = c.beginText(1*inch, 10*inch)
     for line in content.split('\n'):
         text_obj.textLine(line[:90])
     c.drawText(text_obj)
@@ -53,23 +55,27 @@ def create_top_secret_pdf(target, content):
     return buffer
 
 # واجهة المستخدم
-st.title("🔍 منصة التحليل الاستخباري (محامي الشيطان)")
+st.title("🔍 محرك محامي الشيطان للاستخبارات")
 
-target = st.text_input("أدخل الهدف المراد تشريحه:")
+target = st.text_input("أدخل الدولة أو الهدف المراد تحليله:")
 
-if st.button("بدء التحليل العميق"):
+if st.button("بدء التشريح العميق"):
     if target:
-        security_alert() # تفعيل التنبيه الوامض
+        security_alert_ui() # التنبيه الأحمر الوامض
         
-        # برومبت محامي الشيطان المطور
-        prompt = f"""أنت الآن محامي الشيطان وخبير استخبارات. حلل {target} بدون تملق. 
-        1. الوجه القبيح والكوارث المخفية. 2. لعبة العرائس والمتحكمون الحقيقيون. 
-        3. سيناريو الانهيار القادم. 4. خطة النجاة الميكافيلية.
-        تحدث بلهجة حادة ومباشرة."""
+        # البرومبت القاسي (محامي الشيطان)
+        devil_prompt = f"""
+        أنت الآن محامي الشيطان وخبير مخابرات. فكك وضع {target} بلا رحمة:
+        1. الكوارث المخفية ولعبة العرائس.
+        2. من المتحكم الحقيقي خلف الستار؟
+        3. سيناريو الانهيار القريب والبعيد.
+        4. حلول ميكافيلية قاسية.
+        تحدث بلهجة استقصائية حادة جداً.
+        """
         
-        analysis = get_ai_analysis(prompt)
-        st.markdown("### 📊 التقرير الاستخباراتي:")
+        analysis = get_ai_analysis(devil_prompt)
+        st.markdown("### 📊 النتائج المسربة:")
         st.write(analysis)
         
-        pdf = create_top_secret_pdf(target, analysis)
-        st.download_button("📂 تحميل التقرير (TOP SECRET PDF)", pdf, f"{target}_report.pdf")
+        pdf_data = create_pdf(target, analysis)
+        st.download_button("📂 تحميل التقرير السري (PDF)", pdf_data, f"INTEL_{target}.pdf")
