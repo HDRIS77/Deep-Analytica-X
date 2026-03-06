@@ -1,24 +1,9 @@
-const globe = Globe()
+import streamlit as st
+import streamlit.components.v1 as components
 
-(document.getElementById('globe'))
+st.set_page_config(layout="wide")
 
-.globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+with open("index.html", "r", encoding="utf-8") as f:
+    html = f.read()
 
-.backgroundColor('#0b0f1a')
-
-.pointsData(events)
-
-.pointAltitude('size')
-
-.pointColor('color')
-
-.pointRadius(0.2)
-
-.onPointClick(point => {
-
-alert(point.title)
-
-})
-
-globe.controls().autoRotate = true
-globe.controls().autoRotateSpeed = 0.5
+components.html(html, height=900, scrolling=False)
