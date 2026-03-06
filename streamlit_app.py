@@ -4,150 +4,178 @@ import datetime
 import time
 import random
 
-# --- إعدادات الواجهة الفائقة (HUD Style) ---
-st.set_page_config(page_title="NEXUS COMMAND CENTER", layout="wide")
+# --- نظام الهوية البصرية المتطور (HUD INFRASTRUCTURE) ---
+st.set_page_config(page_title="NEXUS | COMMAND & CONTROL", layout="wide")
 
 st.markdown("""
     <style>
-    /* خلفية داكنة جداً مع تدرج لوني استخباراتي */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Share+Tech+Mono&display=swap');
+
+    /* تحويل كامل للموقع للنمط الداكن والنيون */
     .stApp {
-        background: radial-gradient(circle, #001220 0%, #000000 100%);
-        color: #00d4ff;
+        background: #000000;
+        background-image: 
+            linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+        background-size: 50px 50px;
+        color: #00f2ff;
         font-family: 'Share Tech Mono', monospace;
     }
-    
-    /* لوجو NEXUS نيون ثلاثي الأبعاد */
-    .nexus-logo {
-        text-align: center;
-        font-size: 80px;
-        font-weight: 900;
+
+    /* لوجو النيون NEXUS */
+    .neon-logo {
+        font-family: 'Orbitron', sans-serif;
         color: #fff;
-        text-shadow: 0 0 10px #0073ff, 0 0 20px #0073ff, 0 0 40px #0073ff, 0 0 80px #0073ff;
-        letter-spacing: 15px;
-        margin-top: 10px;
-        text-transform: uppercase;
+        text-align: center;
+        font-size: 85px;
+        font-weight: 900;
+        text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff, 0 0 40px #0077ff, 0 0 80px #0077ff;
+        letter-spacing: 25px;
+        padding-top: 20px;
+        animation: glow 3s ease-in-out infinite alternate;
     }
 
-    /* شريط البيانات العلوي */
-    .top-bar {
-        border-bottom: 2px solid #0073ff;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        font-size: 14px;
-        background: rgba(0, 115, 255, 0.1);
+    @keyframes glow {
+        from { text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff; }
+        to { text-shadow: 0 0 20px #00f2ff, 0 0 50px #0077ff, 0 0 100px #0077ff; }
     }
 
-    /* تصميم كروت البيانات (HUD Units) */
-    .hud-box {
-        border: 1px solid #0073ff;
-        padding: 20px;
-        background: rgba(0, 0, 0, 0.6);
+    /* الساعة الحية ونظام التحديث */
+    .status-bar {
+        text-align: center;
+        font-size: 18px;
+        color: #00f2ff;
+        border: 1px solid #00f2ff;
+        width: 60%;
+        margin: 10px auto;
+        padding: 5px;
+        background: rgba(0, 242, 255, 0.1);
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    }
+
+    /* شاشة الخريطة الحية (Radar Frame) */
+    .radar-container {
+        border: 2px solid #00f2ff;
+        height: 450px;
+        background: url('https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R5Z3R5Z3R5Z3R5Z3R5Z3R5Z3R5Z3R5Z3R5Z3R5JmU9MSZ0PWE/3o7TKMGpxx7S0C5O0w/giphy.gif');
+        background-size: cover;
+        position: relative;
         border-radius: 5px;
-        box-shadow: inset 0 0 15px rgba(0, 115, 255, 0.2);
+        box-shadow: 0 0 25px rgba(0, 242, 255, 0.3);
         margin-bottom: 20px;
     }
 
-    /* الأنيميشن الخاص بالنبض الأحمر للمناطق الساخنة */
-    @keyframes pulse-red {
-        0% { transform: scale(1); opacity: 1; }
-        100% { transform: scale(2.5); opacity: 0; }
-    }
-    .hotspot {
-        width: 12px; height: 12px; background: #ff0000;
+    /* نقاط الصراع (Hotspots) */
+    .war-dot {
+        width: 14px; height: 14px; background: #ff0000;
         border-radius: 50%; position: absolute;
         box-shadow: 0 0 20px #ff0000;
-        animation: pulse-red 2s infinite;
+        animation: pulse-red 1s infinite;
+    }
+
+    @keyframes pulse-red {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(3.5); opacity: 0; }
+    }
+
+    /* كروت البيانات الاستخباراتية */
+    .intel-card {
+        background: rgba(0, 5, 10, 0.9);
+        border: 1px solid #00f2ff;
+        padding: 15px;
+        margin: 5px 0;
+        border-left: 4px solid #ff0000;
+        font-size: 14px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- الهيكل العلوي للموقع ---
-st.markdown('<div class="nexus-logo">NEXUS</div>', unsafe_allow_html=True)
+# --- شاشة الرأس (Header) ---
+st.markdown('<div class="neon-logo">NEXUS</div>', unsafe_allow_html=True)
+now_time = datetime.datetime.now().strftime("%H:%M:%S")
+st.markdown(f'<div class="status-bar">🛰️ LINK_STATUS: SECURE | TIME: {now_time} | PROTOCOL: ULTRA_BLACK_OPS</div>', unsafe_allow_html=True)
 
-now = datetime.datetime.now()
-st.markdown(f"""
-    <div class="top-bar">
-        <span>🛰️ SAT-LINK: ACTIVE</span>
-        <span>🕒 {now.strftime("%H:%M:%S")}</span>
-        <span>🌍 TARGETING_SYSTEM: READY</span>
-    </div>
-""", unsafe_allow_html=True)
+# --- الخريطة الحية والبيانات الجانبية (HUD Layout) ---
+col_map, col_side = st.columns([3, 1])
 
-# --- محاكي الخريطة الحرارية (World Map HUD) ---
-st.markdown('<div class="hud-box" style="height: 350px; position: relative; overflow: hidden; background: url(\'https://i.pinimg.com/originals/05/26/13/05261394f55a1599386d3896504a3770.gif\'); background-size: cover; opacity: 0.6;">', unsafe_allow_html=True)
-# إضافة نقاط نبض عشوائية
-for i in range(6):
-    t, l = random.randint(10, 80), random.randint(5, 95)
-    st.markdown(f'<div class="hotspot" style="top:{t}%; left:{l}%;"></div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+with col_map:
+    st.markdown('<div class="radar-container">', unsafe_allow_html=True)
+    # توليد نقاط اشتعال لايف (تتغير عشوائياً عند كل ضغطة)
+    for i in range(7):
+        t, l = random.randint(15, 85), random.randint(10, 90)
+        st.markdown(f'<div class="war-dot" style="top:{t}%; left:{l}%;"></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# --- المحرك الاستخباراتي (Groq) ---
+with col_side:
+    st.markdown('<div class="intel-card"><b>SYSTEM LOG</b><br>Scanning Darknet...<br>Signals: Intercepted</div>', unsafe_allow_html=True)
+    st.markdown('<div class="intel-card" style="border-left: 4px solid #00f2ff;"><b>GEO-INT</b><br>Coordinates Locked<br>Feed: Real-time</div>', unsafe_allow_html=True)
+    st.markdown('<div class="intel-card" style="border-left: 4px solid #ffd700;"><b>AI_CORE</b><br>Llama-3.3 Active<br>Logic: DEVIL_ADV</div>', unsafe_allow_html=True)
+
+# --- محرك البحث الاستخباراتي (Groq) ---
 API_KEY = st.secrets.get("GROQ_API_KEY", "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")
 
-def nexus_command_engine(target, mode):
+def nexus_execute_intel(target):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
     
-    system_instr = f"""
-    أنت نظام NEXUS للمعلومات العسكرية. تاريخ اليوم: {now.strftime("%Y-%m-%d")}.
-    النمط المفعّل: {mode}.
-    مهمتك تشريح ملف {target} بأسلوب محامي الشيطان.
-    ركز على: 1. المخططات غير المعلنة. 2. أسماء الفاعلين خلف الستار. 3. الفجوات الإعلامية. 4. جداول زمنية دقيقة بالثانية والدقيقة.
-    في النهاية، اكتب إجبارياً: RISK_SCORE: X%
+    current_full_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    prompt = f"""
+    أنت نظام NEXUS للمعلومات العسكرية والتحليل الاستراتيجي. تاريخ ووقت اللحظة الحالية: {current_full_time}.
+    المهمة: تشريح ملف {target} فوراً وبدقة متناهية.
+    المتطلبات الإجبارية للتقرير:
+    1. [المخطط الهيكلي المسكوت عنه]: كشف الخطة الكبرى التي يتم تنفيذها الآن في {target}.
+    2. [النقاط المشتعلة]: حدد أماكن التوتر والعمليات الجارية بالدقيقة والثانية.
+    3. [المتحكمون في الظل]: اذكر أسماء الجهات والشركات الفاعلة في هذا الملف.
+    4. [سيناريو الـ 48 ساعة]: ماذا سيحدث بناءً على التحركات الحالية؟
+    5. نسبة الخطر الإجمالية: RISK_SCORE: X%
+    استخدم لغة عسكرية، جافة، وصادمة.
     """
     
     data = {
         "model": "llama-3.3-70b-versatile",
-        "messages": [{"role": "system", "content": system_instr},
-                     {"role": "user", "content": f"أعطني التقرير السري حول {target}"}],
-        "temperature": 0.2
+        "messages": [{"role": "system", "content": "NEXUS CORE OPERATIONAL AI"},
+                     {"role": "user", "content": prompt}],
+        "temperature": 0.1
     }
     
     try:
         response = requests.post(url, headers=headers, json=data)
         return response.json()['choices'][0]['message']['content']
     except:
-        return "CRITICAL ERROR: CONNECTION TO CORE LOST."
+        return "CRITICAL FAILURE: SIGNAL LOST."
 
-# --- منطقة التحكم والمدخلات ---
-col1, col2 = st.columns([2, 1])
+# --- منطقة العمليات (Input Area) ---
+target_input = st.text_input("📡 إدخال إحداثيات الهدف (اسم الموضوع):", placeholder="مثلاً: المخطط العسكري في طهران الآن...")
 
-with col1:
-    st.markdown('<div class="hud-box">', unsafe_allow_html=True)
-    target = st.text_input("📍 أدخل إحداثيات الهدف الاستراتيجي:", placeholder="دولة، منظمة، أو حدث عاجل...")
-    mode = st.radio("إعدادات التشريح المعرفي:", ["Deep Investigation", "Ultra Black Ops (كشف المخططات)"], horizontal=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col2:
-    st.markdown('<div class="hud-box">', unsafe_allow_html=True)
-    st.write("📊 إحصائيات النظام")
-    st.write(f"CPU: {random.randint(40, 70)}%")
-    st.write(f"ENCRYPTION: 256-bit")
-    st.write(f"SOURCES: Classified")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-if st.button("🔥 بدء التشريح العميق"):
-    if target:
-        st.write("⏳ جاري اختراق البروتوكولات...")
-        report = nexus_command_engine(target, mode)
+if st.button("EXECUTE DEEP ANALYSIS"):
+    if target_input:
+        with st.status("🛠️ جارٍ اختراق البروتوكولات الإعلامية وجلب البيانات الحية...", expanded=True) as status:
+            st.write("سحب إشارات القمر الصناعي...")
+            time.sleep(1)
+            st.write("تفكيك التشفير الاستخباراتي...")
+            intel_report = nexus_execute_intel(target_input)
+            status.update(label="✅ تجميع البيانات المكتمل", state="complete", expanded=False)
         
-        # معالجة مؤشر الخطر
-        risk = "90"
-        if "RISK_SCORE:" in report:
-            risk = report.split("RISK_SCORE:")[1].split("%")[0].strip()
+        # استخراج مؤشر الخطر
+        risk = "85"
+        if "RISK_SCORE:" in intel_report:
+            risk = intel_report.split("RISK_SCORE:")[1].split("%")[0].strip()
         
-        # عرض النتائج
-        st.markdown(f"""
-            <div class="hud-box" style="border-color: #ff0000;">
-                <h2 style="color: #ff0000; text-align: center;">REPORT DATA: {target.upper()}</h2>
-                <h3 style="text-align: center; color: #fff;">LIVE THREAT LEVEL: {risk}%</h3>
-            </div>
-        """, unsafe_allow_html=True)
+        # عرض التقرير بأسلوب الشاشات المسربة
+        st.markdown(f"### 📄 INTELLIGENCE FEED: {target_input.upper()}")
+        st.code(intel_report, language='markdown')
         
-        st.code(report, language="markdown") # عرض التقرير كأكواد مسربة
-        
-        st.sidebar.markdown(f"<h1 style='color:red; text-align:center;'>{risk}%</h1>", unsafe_allow_html=True)
+        # التنبيهات في الشريط الجانبي
+        st.sidebar.markdown(f"<h1 style='color:#ff0000; text-align:center;'>{risk}%</h1>", unsafe_allow_html=True)
+        st.sidebar.markdown("<p style='text-align:center;'>THREAT PROBABILITY</p>", unsafe_allow_html=True)
         st.sidebar.progress(int(risk))
     else:
-        st.warning("يرجى إدخال هدف أولاً.")
+        st.error("Target Coordinates Missing.")
+
+# شريط الأخبار المتحرك في الأسفل (Ticker)
+st.markdown("""
+    <marquee style="color: #00f2ff; font-family: 'Share Tech Mono'; border-top: 1px solid #00f2ff; padding: 5px;">
+        ⚠️ URGENT: NEXUS SATELLITE 01 TRACKING NEW MOVEMENTS IN THE REGION... STATUS: MONITORING... ⚠️
+    </marquee>
+""", unsafe_allow_html=True)
