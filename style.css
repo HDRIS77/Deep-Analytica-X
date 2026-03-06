@@ -1,0 +1,56 @@
+body{
+margin:0;
+background:#0b0f1a;
+font-family:Arial;
+color:white;
+overflow:hidden;
+}
+
+#globe{
+position:absolute;
+top:0;
+bottom:0;
+width:100%;
+}
+
+.topbar{
+position:absolute;
+top:10px;
+left:20px;
+z-index:10;
+display:flex;
+gap:30px;
+align-items:center;
+}
+
+.logo{
+font-weight:bold;
+font-size:20px;
+}
+
+.tension{
+border:2px solid #00ff88;
+padding:8px 15px;
+border-radius:20px;
+color:#00ff88;
+}
+
+.filters{
+position:absolute;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:10px;
+}
+
+.filters button{
+
+background:#1a2135;
+border:none;
+padding:8px 14px;
+color:white;
+border-radius:10px;
+cursor:pointer;
+
+}
