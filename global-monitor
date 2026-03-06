@@ -1,8 +1,5 @@
-project
+global-monitor
 │
-├ app.py
 ├ index.html
 ├ style.css
 ├ app.js
-├ data.js
-└ requirements.txt
